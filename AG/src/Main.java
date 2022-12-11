@@ -66,7 +66,7 @@ public class Main {
         ArrayList<process> developed_Arr = new ArrayList<process>();
 
         for (int i = 0; i < arr.size(); i++) {
-            if ((arr.get(i).getArrival_time() <= currentTime)) {
+            if ((arr.get(i).getArrival_time() < currentTime)) {
                 developed_Arr.add(arr.get(i));
             }
         }
@@ -89,22 +89,22 @@ public class Main {
 
         while (pArray.size() != 0) {
             int Q1 = delta(currentProcess.getQuantum_time(), 25);
-            
-            
+
+
             if (currentProcess.getRemaining_time() < Q1) {
 
-                // Time update 
+                // Time update
                 currentTime += currentProcess.getRemaining_time();
 
-                // updating process state 
+                // updating process state
                 currentProcess.setQuantum_time(0);
                 currentProcess.setRemaining_time(0);
                 currentProcess.setEnd_time(currentTime);
 
-                //  transfer the process from procceses arry to the finished processes array 
+                //  transfer the process from procceses arry to the finished processes array
                 fArray.add(currentProcess);
                 pArray.remove(currentProcess);
-                
+
 
 
                 // picking the Nxt process By FCFS
@@ -112,20 +112,20 @@ public class Main {
                 if(tempArray.size()!=0)
                     currentProcess = sort(tempArray, "FCFS").get(0);
                 continue;
-                
+
             } else {
 
                 if (currentProcess.getRemaining_time() == Q1) {
-                
-                    // Time update 
+
+                    // Time update
                     currentTime += currentProcess.getRemaining_time();
 
-                    // updating process state 
+                    // updating process state
                     currentProcess.setQuantum_time(0);
                     currentProcess.setRemaining_time(0);
                     currentProcess.setEnd_time(currentTime);
 
-                    //  transfer the process from procceses arry to the finished processes array 
+                    //  transfer the process from procceses arry to the finished processes array
                     fArray.add(currentProcess);
                     pArray.remove(currentProcess);
 
@@ -136,10 +136,10 @@ public class Main {
                     currentProcess = sort(tempArray, "NPP").get(0);
                     continue;
                 } else {
-                    // update time 
+                    // update time
                     currentTime += Q1;
 
-                    // updating process state 
+                    // updating process state
                     currentProcess.setRemaining_time(currentProcess.getRemaining_time() - Q1);
                     currentProcess.setQuantumRemaining(currentProcess.getQuantumRemaining() - Q1);
 
@@ -148,23 +148,23 @@ public class Main {
                     previousProcess = currentProcess;
                     tempArray = get_tillnow(pArray, currentTime);
                     currentProcess = sort(pArray,"NPP").get(0);
-                    
-                        //if there's a context switching by PP or not at Q1 
+
+                        //if there's a context switching by PP or not at Q1
                         if(previousProcess == currentProcess){
-                           
+
                             int Q2 = delta(currentProcess.getQuantum_time(), 50);
                             if(currentProcess.getRemaining_time() > (Q2-Q1) ){
-                               
+
                                 int Q4 = delta(currentProcess.getQuantum_time(),100);
-                               
+
                                 // a process with a shorteset job came to existense int the intervel of Q2 to the end of the Quantum time
                                 for(int i = Q2; i < (Q4-Q2); i++ ){
-                                   
+
                                     currentTime++;
                                     tempArray= get_tillnow(pArray,currentTime);
                                     previousProcess=currentProcess;
                                     currentProcess=sort(tempArray,"SJF").get(0);
-                                    
+
                                     if(previousProcess==currentProcess){
                                        currentProcess.setRemaining_time(currentProcess.getRemaining_time()-1);
                                        currentProcess.setQuantumRemaining(currentProcess.getQuantumRemaining()-1);
@@ -174,46 +174,46 @@ public class Main {
                                         continue;
                                     }
                                 }
-                              
-                               // the process took all it's quantum time and still have job to do 
+
+                               // the process took all it's quantum time and still have job to do
                                 if(currentProcess.getRemaining_time()>0){
-                                  
+
                                    currentProcess.setQuantum_time(currentProcess.getQuantum_time()+currentProcess.getQuantumRemaining()+2);
-                                    
+
                                     // picking the Nxt process By FCFS
                                     tempArray = get_tillnow(pArray, currentTime);
                                     currentProcess = sort(tempArray, "FCFS").get(0);
                                     continue;
                                 }else{
-                                     // updating process state 
+                                     // updating process state
                                     currentProcess.setQuantum_time(0);
                                     currentProcess.setRemaining_time(0);
                                     currentProcess.setEnd_time(currentTime);
 
-                                    //  transfer the process from procceses arry to the finished processes array 
+                                    //  transfer the process from procceses arry to the finished processes array
                                     fArray.add(currentProcess);
                                     pArray.remove(currentProcess);
-                                   
+
                                     // picking the Nxt process By SJF
                                     tempArray = get_tillnow(pArray, currentTime);
                                     currentProcess = sort(tempArray, "SJF").get(0);
                                     continue;
-                                    
+
                                 }
-                                // else for ending 
+                                // else for ending
                             }
                             else{
-                               
+
                                 if(currentProcess.getRemaining_time() == (Q2 - Q1)){
-                                    //time update 
+                                    //time update
                                     currentTime += (Q2-Q1);
 
-                                    // updating process state 
+                                    // updating process state
                                     currentProcess.setQuantum_time(0);
                                     currentProcess.setRemaining_time(0);
                                     currentProcess.setEnd_time(currentTime);
 
-                                    //  transfer the process from procceses arry to the finished processes array 
+                                    //  transfer the process from procceses arry to the finished processes array
                                     fArray.add(currentProcess);
                                     pArray.remove(currentProcess);
 
@@ -224,15 +224,15 @@ public class Main {
                                 }
                                 else{
 
-                                     //time update 
+                                     //time update
                                     currentTime += currentProcess.getRemaining_time();
 
-                                    // updating process state 
+                                    // updating process state
                                     currentProcess.setQuantum_time(0);
                                     currentProcess.setRemaining_time(0);
                                     currentProcess.setEnd_time(currentTime);
 
-                                    //  transfer the process from procceses arry to the finished processes array 
+                                    //  transfer the process from procceses arry to the finished processes array
                                     fArray.add(currentProcess);
                                     pArray.remove(currentProcess);
 
@@ -244,20 +244,20 @@ public class Main {
                                 }
 
                             }
-                            
+
 
 
                         }
 
-                        // in case of the's a process with a priority higher than the current process 
-                        // will makes t the current and put the previous in the end of the queue with increasing it's quantum time by half the remaining 
+                        // in case of the's a process with a priority higher than the current process
+                        // will makes t the current and put the previous in the end of the queue with increasing it's quantum time by half the remaining
                         else{
                             previousProcess.setRemaining_time(previousProcess.getRemaining_time()-Q1);
                             previousProcess.setQuantum_time(previousProcess.getQuantum_time()+(previousProcess.getQuantumRemaining()/2));
                             continue;
                         }
 
-                       
+
 
                 }
             }
