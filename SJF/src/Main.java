@@ -103,7 +103,7 @@ public class Main {
         System.out.print("-------------------------------------------------------------------");
         System.out.print("\nProcess      Burst Time       Turnaround Time          Waiting Time\n");
         for(int i=0;i<maxProcess;i++){
-            System.out.println(Name[i]+"\t\t"+BurstTime[i]+"\t\t"+TurnAroundTime[i]+"\t\t\t"+WaitingTime[i]);
+            System.out.println(Name[i]+"\t\t\t\t\t"+BurstTime[i]+"\t\t\t\t\t"+TurnAroundTime[i]+"\t\t\t\t\t\t"+WaitingTime[i]);
         }
         System.out.println("Average TurnAround Time: "+(AverageTurnAround/maxProcess));
         System.out.println("Average Waiting Time: "+(AverageWait/maxProcess));

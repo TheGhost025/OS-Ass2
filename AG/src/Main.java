@@ -1,276 +1,239 @@
-import java.util.LinkedList;
-import java.util.Queue;
-import java.lang.Math;
-import java.util.*;
+import java.util.ArrayList;
 
 public class Main {
 
-    static ArrayList<process> sort(ArrayList<process> array, String sortType) {
+    static ArrayList<process> getBy(ArrayList<process> arr, String Type) {
+        process temp = new process();
 
-
-        if (sortType == "FCFS") {
-            for (int i = 0; i < array.size() - 1; i++) {
-                for (int j = 0; j < array.size() - 1; j++) {
-                    if (array.get(j).getArrival_time() > array.get(j + 1).getArrival_time()) {
-                        process temp = array.get(j);
-                        array.set(j, array.get(j + 1));
-                        array.set(j + 1, temp);
+        if (Type == "FCFS") {
+            for (int i = 0; i < arr.size() - 1; i++) {
+                for (int j = 0; j < arr.size() - 1; j++) {
+                    if (arr.get(j).get_Arrivaltime() > arr.get(j + 1).get_Arrivaltime()) {
+                        temp = arr.get(j);
+                        arr.set(j, arr.get(j + 1));
+                        arr.set(j + 1, temp);
                     }
                 }
             }
-        } else if (sortType == "NPP") {
-            for (int i = 0; i < array.size() - 1; i++) {
-                for (int j = 0; j < array.size() - 1; j++) {
-                    if (array.get(j).get_priority() > array.get(j + 1).get_priority()) {
-                        process temp = array.get(j);
-                        array.set(j, array.get(j + 1));
-                        array.set(j + 1, temp);
+        } else if (Type == "NPP") {
+            for (int i = 0; i < arr.size() - 1; i++) {
+                for (int j = 0; j < arr.size() - 1; j++) {
+                    if (arr.get(j).get_Priority() > arr.get(j + 1).get_Priority()) {
+                        temp = arr.get(j);
+                        arr.set(j, arr.get(j + 1));
+                        arr.set(j + 1, temp);
                     }
                 }
             }
-        } else if (sortType == "SJF") {
-            for (int i = 0; i < array.size() - 1; i++) {
-                for (int j = 0; j < array.size() - 1; j++) {
-                    if (array.get(j).getRemaining_time() > array.get(j + 1).getRemaining_time()) {
-                        process temp = array.get(j);
-                        array.set(j, array.get(j + 1));
-                        array.set(j + 1, temp);
+        } else if (Type == "SJF") {
+            for (int i = 0; i < arr.size() - 1; i++) {
+                for (int j = 0; j < arr.size() - 1; j++) {
+                    if (arr.get(j).get_Remainingtime() > arr.get(j + 1).get_Remainingtime()) {
+                        temp = arr.get(j);
+                        arr.set(j, arr.get(j + 1));
+                        arr.set(j + 1, temp);
                     }
                 }
             }
         }
-        return array;
+        return arr;
     }
-
-
-    public static void main(String[] args) {
-        Queue<process> pQueue = new LinkedList<process>();
-        ArrayList<process> arr = new ArrayList<process>();
-        ArrayList<process> arr1 = new ArrayList<process>();
-        temp t = new temp();
-        arr = t.usage();
-        AG_Scheduler(arr);
-    }
-
-    //function to get the 
-    static int delta(int q, double percentage) {
-        double result = (percentage / 100.0) * q;
+    static int ceil(int quantum, double percentage) {
+        double result = (percentage / 100.0) * quantum;
         double result2 = Math.ceil(result);
         return (int) result2;
     }
+    static process endProcess(process current, int currentTime, ArrayList<process> a, ArrayList<process> f, ArrayList<process> temp, String Type,ArrayList<String> name,ArrayList<Integer> history) {
+        // updating process state
+        current.set_Quantumtime(0);
+        history.add(current.get_Quantumtime());
+        name.add(current.get_Processname());
+        current.set_Remainingtime(0);
+        current.set_Endtime(currentTime);
 
-//get till now 
+        //  transfer the process from procceses arry to the finished processes array
+        f.add(current);
+        a.remove(current);
 
-    static ArrayList<process> get_tillnow(ArrayList<process> arr, int currentTime) {
+        // picking the Nxt process By FCFS
+        temp = get_ActiceProcess(a, currentTime);
+        if (temp.size() != 0)
+            current = getBy(temp, Type).get(0);
 
-        ArrayList<process> developed_Arr = new ArrayList<process>();
+        return current;
+    }
+
+    static ArrayList<process> get_ActiceProcess(ArrayList<process> arr, int currentTime) {
+
+        ArrayList<process> ActiveProcess = new ArrayList<process>();
 
         for (int i = 0; i < arr.size(); i++) {
-            if ((arr.get(i).getArrival_time() < currentTime)) {
-                developed_Arr.add(arr.get(i));
+            if ((arr.get(i).get_Arrivaltime() <= currentTime)) {
+                ActiveProcess.add(arr.get(i));
             }
         }
-        return developed_Arr;
+        return ActiveProcess;
     }
 
-
-
-    static void AG_Scheduler(ArrayList<process> pArray) {
-
+    static ArrayList<process> AG(ArrayList<process> proccesses, ArrayList<Integer> history,ArrayList<String> name,ArrayList<String> exec) {
         int currentTime = 0;
-        ArrayList<process> fArray = new ArrayList<process>();
-        ArrayList<process> tempArray = new ArrayList<process>();
-        
-        // the currentProcess = working process = running process 
-        process currentProcess ;
-        process previousProcess;
+        ArrayList<process> FinshedProcesses = new ArrayList<process>();
+        ArrayList<process> temp = new ArrayList<process>();
 
-        currentProcess = sort(pArray, "FCFS").get(0);
+        process current;
+        process previous;
 
-        while (pArray.size() != 0) {
-            int Q1 = delta(currentProcess.getQuantum_time(), 25);
+        current = getBy(proccesses, "FCFS").get(0);
 
+        while(proccesses.size() > 0) {
+            exec.add(current.get_Processname());
+            int Q1 = ceil(current.get_Quantumtime(), 25);
 
-            if (currentProcess.getRemaining_time() < Q1) {
+            if (current.get_Remainingtime() <= Q1) {
 
-                // Time update
-                currentTime += currentProcess.getRemaining_time();
+                currentTime += current.get_Remainingtime();
+                current = endProcess(current, currentTime, proccesses, FinshedProcesses, temp,"FCFS",name,history);
+                continue;
+            }
+            else {
+                currentTime += Q1;
 
                 // updating process state
-                currentProcess.setQuantum_time(0);
-                currentProcess.setRemaining_time(0);
-                currentProcess.setEnd_time(currentTime);
+                current.set_Remainingtime(current.get_Remainingtime() - Q1);
+                current.set_QuantumRemaining(current.get_QuantumRemaining() - Q1);
 
-                //  transfer the process from procceses arry to the finished processes array
-                fArray.add(currentProcess);
-                pArray.remove(currentProcess);
+                // picking the Nxt process By NPP
+                previous = current;
+                temp = get_ActiceProcess(proccesses, currentTime);
+                current = getBy(temp, "NPP").get(0);
 
+                if (previous == current) {
+                    int Q2 = ceil(current.get_Quantumtime(), 50);
 
+                    if (current.get_Remainingtime() <= (Q2 - Q1)) {
+                        currentTime += current.get_Remainingtime();
 
-                // picking the Nxt process By FCFS
-                tempArray = get_tillnow(pArray, currentTime);
-                if(tempArray.size()!=0)
-                    currentProcess = sort(tempArray, "FCFS").get(0);
-                continue;
+                        current = endProcess(current, currentTime, proccesses, FinshedProcesses, temp,"FCFS",name,history);
+                        continue;
+                    }
+                    else {
+                        currentTime += (Q2 - Q1);
+                        current.set_Remainingtime(current.get_Remainingtime() - (Q2 - Q1));
+                        current.set_QuantumRemaining(current.get_QuantumRemaining() - (Q2 - Q1));
 
-            } else {
+                        previous = current;
+                        temp = get_ActiceProcess(proccesses, currentTime);
+                        current = getBy(temp, "SJF").get(0);
 
-                if (currentProcess.getRemaining_time() == Q1) {
+                        if (current == previous) {
+                            int Q4 = ceil(current.get_Quantumtime(), 100);
+                            boolean state = false ;
 
-                    // Time update
-                    currentTime += currentProcess.getRemaining_time();
+                            for (int i = Q2; i < Q4; i++) {
+                                if(current.get_Remainingtime() == 0){
 
-                    // updating process state
-                    currentProcess.setQuantum_time(0);
-                    currentProcess.setRemaining_time(0);
-                    currentProcess.setEnd_time(currentTime);
-
-                    //  transfer the process from procceses arry to the finished processes array
-                    fArray.add(currentProcess);
-                    pArray.remove(currentProcess);
-
-
-                    // picking the Nxt process By NPP
-
-                    tempArray = get_tillnow(pArray, currentTime);
-                    currentProcess = sort(tempArray, "NPP").get(0);
-                    continue;
-                } else {
-                    // update time
-                    currentTime += Q1;
-
-                    // updating process state
-                    currentProcess.setRemaining_time(currentProcess.getRemaining_time() - Q1);
-                    currentProcess.setQuantumRemaining(currentProcess.getQuantumRemaining() - Q1);
-
-
-                    // picking the Nxt process By NPP
-                    previousProcess = currentProcess;
-                    tempArray = get_tillnow(pArray, currentTime);
-                    currentProcess = sort(pArray,"NPP").get(0);
-
-                        //if there's a context switching by PP or not at Q1
-                        if(previousProcess == currentProcess){
-
-                            int Q2 = delta(currentProcess.getQuantum_time(), 50);
-                            if(currentProcess.getRemaining_time() > (Q2-Q1) ){
-
-                                int Q4 = delta(currentProcess.getQuantum_time(),100);
-
-                                // a process with a shorteset job came to existense int the intervel of Q2 to the end of the Quantum time
-                                for(int i = Q2; i < (Q4-Q2); i++ ){
-
-                                    currentTime++;
-                                    tempArray= get_tillnow(pArray,currentTime);
-                                    previousProcess=currentProcess;
-                                    currentProcess=sort(tempArray,"SJF").get(0);
-
-                                    if(previousProcess==currentProcess){
-                                       currentProcess.setRemaining_time(currentProcess.getRemaining_time()-1);
-                                       currentProcess.setQuantumRemaining(currentProcess.getQuantumRemaining()-1);
-                                    }
-                                    else{
-                                        previousProcess.setQuantum_time(previousProcess.getQuantum_time()+previousProcess.getQuantumRemaining());
-                                        continue;
-                                    }
+                                    current = endProcess(current, currentTime, proccesses, FinshedProcesses, temp,"FCFS",name,history);
+                                    state = true;
+                                    break;
                                 }
+                                temp = get_ActiceProcess(proccesses, currentTime);
+                                previous = current;
+                                current = getBy(temp, "SJF").get(0);
 
-                               // the process took all it's quantum time and still have job to do
-                                if(currentProcess.getRemaining_time()>0){
+                                if (previous == current) {
+                                    current.set_Remainingtime(current.get_Remainingtime() - 1);
+                                    current.set_QuantumRemaining(current.get_QuantumRemaining() - 1);
 
-                                   currentProcess.setQuantum_time(currentProcess.getQuantum_time()+currentProcess.getQuantumRemaining()+2);
-
-                                    // picking the Nxt process By FCFS
-                                    tempArray = get_tillnow(pArray, currentTime);
-                                    currentProcess = sort(tempArray, "FCFS").get(0);
-                                    continue;
-                                }else{
-                                     // updating process state
-                                    currentProcess.setQuantum_time(0);
-                                    currentProcess.setRemaining_time(0);
-                                    currentProcess.setEnd_time(currentTime);
-
-                                    //  transfer the process from procceses arry to the finished processes array
-                                    fArray.add(currentProcess);
-                                    pArray.remove(currentProcess);
-
-                                    // picking the Nxt process By SJF
-                                    tempArray = get_tillnow(pArray, currentTime);
-                                    currentProcess = sort(tempArray, "SJF").get(0);
-                                    continue;
-
+                                } else {
+                                    // Context Switch
+                                    previous.set_Quantumtime(previous.get_Quantumtime() + previous.get_QuantumRemaining());
+                                    history.add(previous.get_Quantumtime());
+                                    name.add(previous.get_Processname());
+                                    previous.set_QuantumRemaining(previous.get_Quantumtime());
+                                    state = true;
+                                    break;
                                 }
-                                // else for ending
+                                currentTime++;
+                            }
+                            if (state) continue;
+                            if (current.get_Remainingtime()>0){
+
+                                current.set_Quantumtime(current.get_Quantumtime()+2);
+                                history.add(current.get_Quantumtime());
+                                name.add(current.get_Processname());
+                                current.set_QuantumRemaining(current.get_Quantumtime());
+
+                                // picking the Nxt process By FCFS
+                                temp = get_ActiceProcess(proccesses, currentTime);
+                                current = getBy(temp, "FCFS").get(0);
+                                continue;
+
                             }
                             else{
-
-                                if(currentProcess.getRemaining_time() == (Q2 - Q1)){
-                                    //time update
-                                    currentTime += (Q2-Q1);
-
-                                    // updating process state
-                                    currentProcess.setQuantum_time(0);
-                                    currentProcess.setRemaining_time(0);
-                                    currentProcess.setEnd_time(currentTime);
-
-                                    //  transfer the process from procceses arry to the finished processes array
-                                    fArray.add(currentProcess);
-                                    pArray.remove(currentProcess);
-
-                                    // picking the Nxt process By SJF
-                                    tempArray = get_tillnow(pArray, currentTime);
-                                    currentProcess = sort(tempArray, "SJF").get(0);
-                                    continue;
-                                }
-                                else{
-
-                                     //time update
-                                    currentTime += currentProcess.getRemaining_time();
-
-                                    // updating process state
-                                    currentProcess.setQuantum_time(0);
-                                    currentProcess.setRemaining_time(0);
-                                    currentProcess.setEnd_time(currentTime);
-
-                                    //  transfer the process from procceses arry to the finished processes array
-                                    fArray.add(currentProcess);
-                                    pArray.remove(currentProcess);
-
-                                    // picking the Nxt process By SJF
-                                    tempArray = get_tillnow(pArray, currentTime);
-                                    currentProcess = sort(tempArray, "NPP").get(0);
-                                    continue;
-
-                                }
-
+                                current = endProcess(current, currentTime, proccesses, FinshedProcesses, temp,"FCFS",name,history);
+                                continue;
                             }
 
-
-
                         }
-
-                        // in case of the's a process with a priority higher than the current process
-                        // will makes t the current and put the previous in the end of the queue with increasing it's quantum time by half the remaining
-                        else{
-                            previousProcess.setRemaining_time(previousProcess.getRemaining_time()-Q1);
-                            previousProcess.setQuantum_time(previousProcess.getQuantum_time()+(previousProcess.getQuantumRemaining()/2));
+                        else {
+                            // Context Switch
+                            previous.set_Quantumtime(previous.get_Quantumtime() + previous.get_QuantumRemaining());
+                            history.add(previous.get_Quantumtime());
+                            name.add(previous.get_Processname());
+                            previous.set_QuantumRemaining(previous.get_Quantumtime());
                             continue;
                         }
-
-
+                    }
 
                 }
+                else {
+                    // Context Switch
+                    previous.set_Quantumtime(previous.get_Quantumtime() + (previous.get_QuantumRemaining()/2));
+                    history.add(previous.get_Quantumtime());
+                    name.add(previous.get_Processname());
+                    previous.set_QuantumRemaining(previous.get_Quantumtime());
+                    continue;
+                }
             }
-
-
-            
-
         }
-      fArray=sort(fArray, "FCFS");
-      for(int i=0;i<fArray.size();i++){
-        System.out.println(fArray.get(i).getEnd_time());
-      }  
-
+        return FinshedProcesses;
     }
 
+    public static void main(String[] args) {
+        ArrayList<process> proccess = new ArrayList<process>();
+        ArrayList<process> endProccess = new ArrayList<process>();
+        ArrayList<Integer> quantumHistory = new ArrayList<Integer>();
+        ArrayList<String> name = new ArrayList<String>();
+        ArrayList<String> execution = new ArrayList<String>();
+        Input input = new Input();
+        proccess=input.input();
+        endProccess = AG(proccess, quantumHistory,name ,execution);
+        endProccess = getBy(endProccess, "FCFS");
+        double AverageTurnAround = 0;
+        double AverageWait = 0;
+        for(int i=0;i<endProccess.size();i++){
+            endProccess.get(i).set_Turnarroundime(endProccess.get(i).get_Endtime()-endProccess.get(i).get_Arrivaltime());
+            AverageTurnAround+=endProccess.get(i).get_Turnarroundime();
+        }
+
+        for(int i=0;i<endProccess.size();i++){
+            endProccess.get(i).set_Waitingtime(endProccess.get(i).get_Arrivaltime()+endProccess.get(i).get_Bursttime());
+            AverageWait+=endProccess.get(i).get_Waitingtime();
+        }
+        for (int i = 0; i < execution.size(); i++) {
+            System.out.print(execution.get(i) + " ");
+        }
+        System.out.println("\n");
+        for (int i = 0; i < quantumHistory.size(); i++) {
+            System.out.print(quantumHistory.get(i) + " "+ name.get(i)+"  ");
+        }
+        System.out.println("\n");
+        System.out.println("-------------------------------------------------------------------");
+        System.out.print("\nProcess      Burst Time       Turnaround Time          Waiting Time\n");
+        for(int i=0;i<endProccess.size();i++){
+            System.out.println(endProccess.get(i).get_Processname()+"\t\t\t\t\t"+endProccess.get(i).get_Bursttime()+"\t\t\t\t\t"+endProccess.get(i).get_Turnarroundime()+"\t\t\t\t\t\t"+endProccess.get(i).get_Waitingtime());
+        }
+        System.out.println("Average TurnAround Time: "+(AverageTurnAround/ endProccess.size()));
+        System.out.println("Average Waiting Time: "+(AverageWait/endProccess.size()));
+    }
 }
